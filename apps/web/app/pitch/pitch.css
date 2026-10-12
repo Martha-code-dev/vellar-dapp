@@ -1,0 +1,670 @@
+/* ============================================================
+   General-use pitch deck — built on the ACTUAL current landing page's
+   visual language (landing.css's .lp system: poster headlines in the
+   condensed Anton face, numbered pastel pillar cards, pill buttons, ink/
+   paper/lime ground alternation), not the thinner "editorial" serif mode
+   the earlier lava-v2 deck used. Reuses landing.css's own classes
+   (.lp-poster, .lp-pillar, .lp-btn--*, .lp-ground--*, .lp-eyebrow) directly
+   so a slide looks like a frame lifted from the real site, and adds only
+   the deck-specific layout (grid positions, evidence rows, proof chips)
+   landing.css has no equivalent for.
+   ============================================================ */
+
+/* Every slide is a full 1600×900 ground — landing.css's .lp-ground--*
+   classes only set background-color, so the slide itself needs the
+   padding/flex scaffolding a scrolling section would normally get from
+   .lp-sec. Content is sized (type scale, card padding, row height) to
+   genuinely fill this fixed canvas — not shrunk to fit inside a small top
+   band with empty space below, which is what a first pass at "stop
+   overflowing" produced. justify-content: center means a slide whose
+   content actually spans close to the full 900px now reads as
+   intentionally full-bleed, not centered-with-a-void underneath. */
+.pitch-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(2.5rem, 6vw, 5.5rem);
+  position: relative;
+  overflow: hidden;
+}
+.pitch-slide.lp-ground--ink {
+  color: var(--lp-on-dark);
+}
+/* The one slide (market sizing) whose content is tall enough that
+   vertical centering pushes its bottom edge into the deck chrome's own
+   page-count/nav row — anchoring to the top instead uses the frame's
+   full available height top-to-bottom rather than centering a block
+   that's taller than it, which overflowed symmetrically at both ends. */
+.pitch-slide--dense {
+  justify-content: flex-start;
+  padding-top: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+/* Poster headline, sized down from the real hero's full clamp (which
+   assumes a scrolling viewport up to 1360px+) to fit inside the deck's
+   fixed 1600×900 stage without wrapping to four lines. */
+.pitch-poster {
+  font-family: var(--lp-condensed);
+  font-weight: 400;
+  font-size: clamp(3.5rem, 2rem + 5.5vw, 6.25rem);
+  line-height: 1;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  margin: 0 0 var(--lp-sp-8);
+  max-width: 17ch;
+}
+.pitch-poster em {
+  font-family: var(--lp-serif);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--lp-lime);
+}
+.pitch-slide:not(.lp-ground--ink) .pitch-poster em {
+  color: var(--lp-forest);
+}
+
+/* Section title, for slides that use the normal (non-poster) h2 scale —
+   same face/weight as the real .lp h2, sized for the fixed stage. */
+.pitch-h2 {
+  font-family: var(--lp-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0 0 var(--lp-sp-6);
+  max-width: 20ch;
+  font-size: clamp(2.5rem, 1.9rem + 2.6vw, 3.75rem);
+}
+.pitch-h2 em {
+  font-family: var(--lp-serif);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--lp-forest);
+}
+.lp-ground--ink .pitch-h2 em {
+  color: var(--lp-lime);
+}
+
+.pitch-lead {
+  font-family: var(--lp-body);
+  font-size: clamp(1.1875rem, 1.05rem + 0.7vw, 1.5rem);
+  line-height: 1.5;
+  color: var(--lp-ink-soft);
+  max-width: 62ch;
+  margin: 0 0 var(--lp-sp-8);
+}
+.lp-ground--ink .pitch-lead {
+  color: var(--lp-on-dark-soft);
+}
+.pitch-lead b {
+  color: var(--lp-ink);
+  font-weight: 700;
+}
+.lp-ground--ink .pitch-lead b {
+  color: var(--lp-on-dark);
+}
+
+/* Title slide: logo wordmark + poster + lead + pill CTAs, same anatomy as
+   the real hero (hero.tsx), without HeroWaves' scroll-driven WebGL — a
+   deck frame is static, so a simple two-tone radial wash behind the type
+   approximates the hero's dark gradient-wave texture without the shader. */
+.pitch-title {
+  position: relative;
+  overflow: hidden;
+}
+.pitch-title::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 55% at 15% 20%, color-mix(in srgb, var(--lp-mint) 30%, transparent), transparent 70%),
+    radial-gradient(55% 50% at 85% 75%, color-mix(in srgb, var(--lp-lime) 22%, transparent), transparent 70%),
+    radial-gradient(70% 60% at 50% 100%, color-mix(in srgb, var(--lp-sun) 14%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.pitch-title > * {
+  position: relative;
+}
+.pitch-title-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lp-sp-3);
+  margin-top: var(--lp-sp-6);
+}
+.pitch-chip {
+  font-family: var(--lp-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--lp-on-dark);
+  background: color-mix(in srgb, var(--lp-on-dark) 14%, transparent);
+  padding: 0.6em 1.2em;
+  border-radius: var(--lp-r-pill);
+}
+
+/* ---- Eyebrow + pill CTA row, same spacing as the real .lp-cta-row ---- */
+.pitch-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  width: fit-content;
+  font-family: var(--lp-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--lp-ink);
+  margin-bottom: var(--lp-sp-6);
+}
+.lp-ground--ink .pitch-eyebrow {
+  color: var(--lp-lime);
+}
+
+.pitch-cta-row {
+  display: flex;
+  gap: var(--lp-sp-3);
+  margin-top: var(--lp-sp-2);
+}
+
+/* ---- Pillar cards — identical shape to the real .lp-pillar/.lp-pillars,
+   just scoped under pitch- so this file has no dependency ordering
+   requirement against landing.css's own .lp-pillar rules. ---- */
+.pitch-pillars {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), 1fr);
+  gap: 1.5rem;
+}
+.pitch-pillar {
+  padding: var(--lp-sp-8) var(--lp-sp-6);
+  border-radius: var(--lp-r-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 260px;
+}
+.pitch-pillar:nth-child(3n + 1) {
+  background: var(--lp-mint-soft);
+}
+.pitch-pillar:nth-child(3n + 2) {
+  background: var(--lp-sun-soft);
+}
+.pitch-pillar:nth-child(3n) {
+  background: var(--lp-lime-soft);
+}
+.pitch-pillar .num {
+  font-family: var(--lp-display);
+  font-weight: 800;
+  font-size: clamp(2.25rem, 1.8rem + 1.8vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--lp-ink);
+}
+.pitch-pillar h4 {
+  font-family: var(--lp-display);
+  font-weight: 700;
+  font-size: 1.3125rem;
+  margin: 0;
+  color: var(--lp-ink);
+}
+.pitch-pillar p {
+  color: var(--lp-ink-soft);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ---- Evidence rows (numbered facts, used for "how it works" steps,
+   proof points, and honesty callouts) — mono numerals, hairline rule,
+   same depth device as the rest of the brand (borders, not shadows). ---- */
+.pitch-evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: var(--lp-sp-4);
+}
+.pitch-evidence-row {
+  display: grid;
+  /* Fixed first column needs to fit the longest label actually used
+     anywhere in the deck ("Facilitator", "MCP + CLI"), not just the
+     short numerals/one-word labels most rows use — a column sized to the
+     short case let "Facilitator" wrap onto a second line that then
+     visually collided with the row's own body text (align-items:
+     baseline only aligns the first line of each column). */
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: var(--lp-sp-6);
+  align-items: center;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--lp-line);
+}
+/* Used where a list runs 6 rows (vs. the usual 3-4) plus a callout below
+   it on the same slide — the default per-row padding, correct for a
+   shorter list, pushed this exact combination into the deck chrome's own
+   page-count/nav row at the bottom of the fixed 900px stage. */
+.pitch-evidence--tight .pitch-evidence-row {
+  padding: 0.7rem 0;
+}
+.lp-ground--ink .pitch-evidence-row {
+  border-bottom-color: var(--lp-line-dark);
+}
+.pitch-evidence-row .num {
+  font-family: var(--lp-mono);
+  font-weight: 700;
+  font-size: 1.0625rem;
+  color: var(--lp-forest);
+}
+.lp-ground--ink .pitch-evidence-row .num {
+  color: var(--lp-lime);
+}
+.pitch-evidence-row .label {
+  font-family: var(--lp-body);
+  font-size: 1.1875rem;
+  line-height: 1.45;
+  color: var(--lp-ink-soft);
+}
+.lp-ground--ink .pitch-evidence-row .label {
+  color: var(--lp-on-dark-soft);
+}
+
+/* ---- Stat chips (traction numbers) — flat pastel tiles, same family as
+   the pillar cards so numbers read as the same visual weight as the
+   product-pillars story earlier in the deck. ---- */
+.pitch-stats-row {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), 1fr);
+  gap: 1.25rem;
+  margin: var(--lp-sp-6) 0;
+}
+.pitch-stat {
+  padding: var(--lp-sp-6) 1.25rem;
+  border-radius: var(--lp-r-card);
+  background: var(--lp-mint-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  min-height: 150px;
+  justify-content: center;
+}
+.pitch-stat:nth-child(2) {
+  background: var(--lp-sun-soft);
+}
+.pitch-stat:nth-child(3) {
+  background: var(--lp-lime-soft);
+}
+.pitch-stat .v {
+  font-family: var(--lp-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 1.6rem + 1.8vw, 2.75rem);
+  color: var(--lp-ink);
+  line-height: 1;
+}
+.pitch-stat .l {
+  font-family: var(--lp-body);
+  font-size: 1rem;
+  color: var(--lp-ink-soft);
+  line-height: 1.4;
+}
+
+/* ---- TAM/SAM/SOM figure blocks ---- */
+.pitch-figs-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin: 0 0 var(--lp-sp-4);
+}
+.pitch-fig-col {
+  padding: var(--lp-sp-4);
+  border: 1px solid var(--lp-line);
+  border-radius: var(--lp-r-lg);
+}
+.pitch-fig-label {
+  font-family: var(--lp-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lp-ink-faint);
+  margin: 0 0 var(--lp-sp-3);
+}
+.pitch-fig-value {
+  font-family: var(--lp-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 1.6rem + 1.6vw, 2.75rem);
+  color: var(--lp-forest);
+  line-height: 1;
+}
+.pitch-fig-arrow {
+  margin: 0 0.4em;
+  color: var(--lp-ink-faint);
+  font-size: 1.5rem;
+}
+.pitch-fig-cap {
+  margin-top: var(--lp-sp-3);
+  font-size: 0.9375rem;
+  color: var(--lp-ink-soft);
+  line-height: 1.5;
+}
+.pitch-fig-src {
+  display: block;
+  margin-top: 0.5em;
+  font-family: var(--lp-mono);
+  font-size: 0.75rem;
+  color: var(--lp-ink-faint);
+}
+
+.pitch-som-equation {
+  display: flex;
+  align-items: stretch;
+  gap: var(--lp-sp-4);
+  flex-wrap: wrap;
+}
+.pitch-som-input {
+  flex: 1;
+  min-width: 160px;
+  padding: var(--lp-sp-3);
+  border: 1px solid var(--lp-line);
+  border-radius: var(--lp-r-md);
+}
+.pitch-som-input .v {
+  font-family: var(--lp-mono);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--lp-ink);
+}
+.pitch-som-input .l {
+  display: block;
+  margin-top: 0.4em;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--lp-ink-soft);
+}
+.pitch-som-input .d {
+  display: block;
+  margin-top: 0.25em;
+  font-family: var(--lp-mono);
+  font-size: 0.8125rem;
+  color: var(--lp-ink-faint);
+}
+.pitch-som-result {
+  margin-top: var(--lp-sp-2);
+  padding: 0.75rem 2rem;
+  background: var(--lp-ink);
+  border-radius: var(--lp-r-lg);
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--lp-sp-4);
+}
+.pitch-som-result .label {
+  font-family: var(--lp-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lp-on-dark-faint);
+  flex-basis: 100%;
+}
+.pitch-som-result .value {
+  font-family: var(--lp-display);
+  font-weight: 800;
+  font-size: clamp(2.25rem, 1.8rem + 2.2vw, 3.5rem);
+  color: var(--lp-lime);
+  line-height: 1;
+}
+.pitch-som-result .detail {
+  font-family: var(--lp-body);
+  font-size: 1.0625rem;
+  color: var(--lp-on-dark-soft);
+  max-width: 36ch;
+}
+
+/* ---- Fee comparison bars ---- */
+.pitch-fee-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lp-sp-6);
+  margin: var(--lp-sp-6) 0 var(--lp-sp-8);
+}
+.pitch-fee-line {
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 1fr) 8rem;
+  align-items: center;
+  gap: 1.25rem;
+}
+.pitch-fee-line .name {
+  font-size: 1.125rem;
+  color: var(--lp-ink-soft);
+}
+/* Both track and fill are <span> in the markup (inline by default), so
+   without an explicit display they ignore the width/height set here and
+   below — every bar rendered as the track's own flat background with no
+   visible fill at all, instead of a proportional bar. display: block (or
+   inline-block) is what makes an element's own width/height apply. */
+.pitch-fee-line .track {
+  display: block;
+  height: 28px;
+  background: var(--lp-line);
+  border-radius: var(--lp-r-pill);
+  overflow: hidden;
+}
+.pitch-fee-line .fill {
+  display: block;
+  height: 100%;
+  background: var(--lp-ink-faint);
+  border-radius: var(--lp-r-pill);
+}
+.pitch-fee-line.is-lead .name {
+  color: var(--lp-ink);
+  font-weight: 700;
+}
+.pitch-fee-line.is-lead .fill {
+  background: var(--lp-forest);
+}
+.pitch-fee-line .amt {
+  font-family: var(--lp-mono);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--lp-ink);
+  text-align: right;
+}
+.pitch-fee-line.is-lead .amt {
+  color: var(--lp-forest);
+}
+
+/* ---- Competitive matrix — same checkmark convention, pill-radius cells
+   to match the rounded brand shape rather than a sharp spreadsheet grid. ---- */
+.pitch-matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  font-size: 1.0625rem;
+  margin-top: var(--lp-sp-3);
+}
+.pitch-matrix thead th {
+  font-family: var(--lp-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lp-ink-faint);
+  text-align: center;
+  padding: 0 var(--lp-sp-4) var(--lp-sp-3);
+}
+.pitch-matrix thead th:first-child {
+  text-align: left;
+}
+.pitch-matrix thead th.is-lead {
+  color: var(--lp-forest);
+}
+.pitch-matrix tbody th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--lp-ink-soft);
+  padding: var(--lp-sp-3) var(--lp-sp-4) var(--lp-sp-3) 0;
+  white-space: nowrap;
+}
+.pitch-matrix tbody td {
+  text-align: center;
+  padding: var(--lp-sp-3) var(--lp-sp-4);
+  background: var(--lp-paper-tint);
+}
+.pitch-matrix tbody td:first-of-type {
+  border-radius: var(--lp-r-md) 0 0 var(--lp-r-md);
+}
+.pitch-matrix tbody td:last-child {
+  border-radius: 0 var(--lp-r-md) var(--lp-r-md) 0;
+}
+.pitch-matrix tbody td.is-lead {
+  background: var(--lp-lime-soft);
+}
+.pitch-matrix .yes {
+  color: var(--lp-forest);
+  font-weight: 700;
+  font-size: 1.375rem;
+}
+.pitch-matrix .no {
+  color: var(--lp-ink-faint);
+  font-size: 1.375rem;
+}
+
+/* ---- Callout block (moat statement) — ink card, lime kicker, same
+   device the real site uses for FAQ/dark cards. ---- */
+.pitch-callout {
+  padding: var(--lp-sp-6);
+  background: var(--lp-ink);
+  border-radius: var(--lp-r-card);
+  margin: var(--lp-sp-2) 0 var(--lp-sp-6);
+}
+/* Paired with .pitch-evidence--tight — see that rule's comment. */
+.pitch-callout--tight {
+  padding: var(--lp-sp-4) var(--lp-sp-6);
+  margin: 0;
+}
+.pitch-callout-kicker {
+  display: block;
+  font-family: var(--lp-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lp-lime);
+  margin-bottom: 0.4em;
+}
+.pitch-callout p {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.45;
+  color: var(--lp-on-dark);
+}
+.pitch-callout p b {
+  color: var(--lp-lime);
+  font-weight: 700;
+}
+
+.pitch-note {
+  font-size: 0.9375rem;
+  color: var(--lp-ink);
+  line-height: 1.5;
+  max-width: 72ch;
+  margin-top: var(--lp-sp-6);
+}
+.pitch-note b {
+  color: var(--lp-forest);
+  font-weight: 700;
+}
+.lp-ground--ink .pitch-note {
+  color: var(--lp-on-dark-soft);
+}
+.lp-ground--ink .pitch-note b {
+  color: var(--lp-lime);
+}
+
+.pitch-kicker {
+  font-family: var(--lp-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lp-ink-faint);
+  margin: var(--lp-sp-6) 0 var(--lp-sp-2);
+}
+
+/* ---- Closing slide ---- */
+.pitch-close {
+  text-align: center;
+  align-items: center;
+}
+.pitch-close .pitch-poster {
+  margin-inline: auto;
+  max-width: 14ch;
+}
+.pitch-close .pitch-lead {
+  margin-inline: auto;
+}
+.pitch-close .pitch-title-foot {
+  justify-content: center;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .pitch-pillars,
+  .pitch-stats-row,
+  .pitch-figs-row {
+    grid-template-columns: 1fr;
+  }
+  .pitch-som-equation {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .pitch-slide {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .pitch-title::before,
+  .pitch-pillar,
+  .pitch-stat,
+  .pitch-callout,
+  .pitch-som-result,
+  .pitch-matrix tbody td,
+  .pitch-chip {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ---- Stage + corner logo (scale-to-fit.tsx) ----
+   Fixed 1600×900 stage sizing (overriding deck.css's `position: fixed;
+   inset: 0`, which always fills the real viewport — see lava-v2.css's
+   original comment on this exact override for why `inset` beats explicit
+   width/height otherwise) and the corner wordmark that sits outside
+   .deck-chrome so it survives PDF export. */
+.pitch-stage .lp.deck {
+  position: static;
+  width: 1600px;
+  height: 900px;
+}
+.pitch-stage .deck-slide {
+  justify-content: flex-start;
+  padding: 0;
+}
+.deck-corner-logo {
+  position: absolute;
+  top: 40px;
+  right: 48px;
+  height: 34px;
+  width: auto;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 5;
+}
+@media print {
+  .deck-corner-logo {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
